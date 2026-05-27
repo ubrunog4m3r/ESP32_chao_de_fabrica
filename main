@@ -1,0 +1,41 @@
+#include <DHT.h>
+
+#define TRIG_PIN 26
+#define ECHO_PIN 27
+#define LDR_PIN 36
+#define PIR_PIN 22
+#define LED_VERDE 21
+#define LED_VERMELHO 19
+#define DHT_PIN 23
+#define DHT_TYPE DHT22
+
+DHT dht(DHT_PIN, DHT_TYPE);
+
+float alturaTanque;
+float distancia;
+float nivelTanque;
+float temperatura;
+float umidade;
+uint16_t luminosidade;
+bool presencaDetectada = false;
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  pinMode(PIR_PIN, INPUT);
+  pinMode(LED_VERDE, OUTPUT);
+  pinMode(LED_VERMELHO, OUTPUT);
+  dht.begin();
+  calibrarAlturaTanque();
+}
+
+void loop() {
+  controleLEDs();
+  lerHCSR04();
+  lerDHT();
+  lerLDR();
+  lerHCSR501();
+  monitorSerial();
+
+}
