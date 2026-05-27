@@ -1,0 +1,56 @@
+void monitorSerial(){
+  const unsigned long intervaloMonitorSerial = 5000;
+  static unsigned long tempoMonitorSerial = 0;
+
+  if(millis() - tempoMonitorSerial >= intervaloMonitorSerial){
+    tempoMonitorSerial = millis();
+    if(distancia < 0){
+      Serial.println("Erro ao ler HC-SR04");
+    }
+    else{
+      if(nivelTanque >= 20){
+        Serial.print("Nivel do tanque: ");
+        Serial.print(nivelTanque);
+        Serial.println(" %");
+      }
+      else{
+        Serial.println("Alerta! Nível de tinta baixo!");
+      }
+    }
+    if(isnan(temperatura) || isnan(umidade)){
+      Serial.println("Erro ao ler DHT");
+    }
+    else{
+      Serial.print("Temperatura: ");
+      Serial.print(temperatura);
+      Serial.println("°C");
+      Serial.print("Umidade: ");
+      Serial.print(umidade);
+      Serial.println("%");
+    }
+    Serial.print("Luminosidade: ");
+    Serial.println(luminosidade);
+    Serial.println(presencaDetectada ? "Presenca detectada!\n" : "Sem presenca detectada\n");
+  }
+}
+
+void calibrarAlturaTanque(){
+  float soma = 0;
+  for(int i = 0; i < 10; i++){
+    lerHCSR04();
+    delay(150);
+    if(distancia > 0){
+      soma += distancia;
+    }
+    else{
+      i--;
+    }
+  }
+  alturaTanque = soma / 10;
+}
+
+void controleLEDs(){
+  bool estadoSistema = nivelTanque >= 20;
+  digitalWrite(LED_VERDE, estadoSistema);
+  digitalWrite(LED_VERMELHO, !estadoSistema);
+}
