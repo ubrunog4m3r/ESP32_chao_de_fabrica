@@ -1,0 +1,31 @@
+void aoEnviar(const uint8_t *mac, esp_now_send_status_t status){
+  Serial.print("Envio: ");
+  Serial.println(status == ESP_NOW_SEND_SUCCESS ? "OK" : "FALHOU");
+}
+
+void setupEspNow(){
+  WiFi.mode(WIFI_STA);
+  if(esp_now_init() != ESP_OK){
+    return;
+  }
+
+  esp_now_register_send_cb(aoEnviar);
+  esp_now_peer_info_t peer = {};
+  memcpy(peer.peer_addr, macReceptor, 6);
+  peer.channel = 0;  // mesmo canal do receptor
+  peer.encrypt = false;
+
+  if (esp_now_add_peer(&peer) == ESP_OK) {
+    Serial.println("Peer adicionado com sucesso");
+  }
+}
+
+void enviarDados(){
+  const unsigned long intervaloEnvio = 2000;
+  static unsigned long tempoEnvio = 0;
+
+  if(millis() - tempoEnvio >= intervaloEnvio){
+    tempoEnvio = millis();
+    esp_now_send(macReceptor, (uint8_t *)&dados, sizeof(dados));
+  }
+}
