@@ -8,37 +8,52 @@ void monitorSerial(){
       Serial.println("Erro ao ler HC-SR04");
     }
     else{
-      if(nivelTanque >= 20){
+      if(dados.nivelTanque >= 20){
         Serial.print("Nivel do tanque: ");
-        Serial.print(nivelTanque);
+        Serial.print(dados.nivelTanque);
         Serial.println(" %");
       }
       else{
         Serial.println("Alerta! Nível de tinta baixo!");
       }
     }
-    if(isnan(temperatura) || isnan(umidade)){
+    if(isnan(dados.temperatura) || isnan(dados.umidade)){
       Serial.println("Erro ao ler DHT");
     }
     else{
       Serial.print("Temperatura: ");
-      Serial.print(temperatura);
+      Serial.print(dados.temperatura);
       Serial.println("°C");
       Serial.print("Umidade: ");
-      Serial.print(umidade);
+      Serial.print(dados.umidade);
       Serial.println("%");
     }
     Serial.print("Luminosidade: ");
-    Serial.println(luminosidade);
-    Serial.println(presencaDetectada ? "Presenca detectada!\n" : "Sem presenca detectada\n");
+    Serial.println(dados.luminosidade);
+    Serial.println(dados.presencaDetectada ? "Presenca detectada!\n" : "Sem presenca detectada\n");
   }
 }
 
 void calibrarAlturaTanque(){
   float soma = 0;
   for(int i = 0; i < 10; i++){
-    lerHCSR04();
-    delay(150);
+    const float velocidadeDoSom = 0.017; // 0.034/2
+
+    digitalWrite(TRIG_PIN, LOW);
+    delayMicroseconds(2);
+    digitalWrite(TRIG_PIN, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(TRIG_PIN, LOW);
+
+    unsigned long tempo = pulseIn(ECHO_PIN, HIGH, 10000);
+
+    if(tempo == 0){
+      distancia = -1;
+    }
+    else{
+      distancia = tempo * velocidadeDoSom;
+    }
+
     if(distancia > 0){
       soma += distancia;
     }
@@ -50,7 +65,7 @@ void calibrarAlturaTanque(){
 }
 
 void controleLEDs(){
-  bool estadoSistema = nivelTanque >= 20;
+  bool estadoSistema = dados.nivelTanque >= 20;
   digitalWrite(LED_VERDE, estadoSistema);
   digitalWrite(LED_VERMELHO, !estadoSistema);
 }
