@@ -1,4 +1,18 @@
+#include <WiFi.h>
+#include <esp_now.h>
 #include <DHT.h>
+
+uint8_t macReceptor[] = {0xB4, 0xBF, 0xE9, 0x32, 0xDF, 0xE4};
+
+typedef struct{
+  float nivelTanque = 100.0;
+  float temperatura;
+  float umidade;
+  uint16_t luminosidade;
+  bool presencaDetectada = false;
+} DadosSensor;
+
+DadosSensor dados;
 
 #define TRIG_PIN 26
 #define ECHO_PIN 27
@@ -13,11 +27,6 @@ DHT dht(DHT_PIN, DHT_TYPE);
 
 float alturaTanque;
 float distancia;
-float nivelTanque;
-float temperatura;
-float umidade;
-uint16_t luminosidade;
-bool presencaDetectada = false;
 
 void setup() {
   Serial.begin(115200);
@@ -26,16 +35,17 @@ void setup() {
   pinMode(PIR_PIN, INPUT);
   pinMode(LED_VERDE, OUTPUT);
   pinMode(LED_VERMELHO, OUTPUT);
-  dht.begin();
+  setupEspNow();
   calibrarAlturaTanque();
+  dht.begin();
 }
 
 void loop() {
-  controleLEDs();
   lerHCSR04();
   lerDHT();
   lerLDR();
   lerHCSR501();
+  controleLEDs();
+  enviarDados();
   monitorSerial();
-
 }
