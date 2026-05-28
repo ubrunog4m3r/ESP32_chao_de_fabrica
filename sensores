@@ -20,7 +20,7 @@ void lerHCSR04(){
     }
     else{
       distancia = tempo * velocidadeDoSom;
-      nivelTanque = constrain(((alturaTanque - distancia) / alturaTanque) * 100, 0, 100);
+      dados.nivelTanque = constrain(((alturaTanque - distancia) / alturaTanque) * 100, 0, 100);
     }
   }
 }
@@ -31,8 +31,8 @@ void lerDHT(){
 
   if(millis() - tempoDHT >= intervaloDHT){
     tempoDHT = millis();
-    temperatura = dht.readTemperature();
-    umidade = dht.readHumidity();
+    dados.temperatura = dht.readTemperature();
+    dados.umidade = dht.readHumidity();
   }
 }
 
@@ -41,10 +41,15 @@ void lerLDR(){
   static unsigned long tempoLDR = 0;
   if(millis() - tempoLDR >= intervaloLDR){
     tempoLDR = millis();
-    luminosidade = analogRead(LDR_PIN);
+    dados.luminosidade = analogRead(LDR_PIN);
   }  
 }
 
 void lerHCSR501(){
-  presencaDetectada = digitalRead(PIR_PIN);
+  const unsigned long intervaloPIR = 500;
+  static unsigned long tempoPIR = 0;
+  if(millis() - tempoPIR >= intervaloPIR){
+    tempoPIR = millis();
+    dados.presencaDetectada = digitalRead(PIR_PIN);
+  }
 }
